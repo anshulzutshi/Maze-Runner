@@ -1,0 +1,317 @@
+import java.awt.*;
+import java.applet.*;
+import javax.swing.*;
+import java.util.*;
+import java.awt.event.*;
+import java.io.*;
+
+public class mazeRacer extends JApplet implements KeyListener{
+    static char[][] maze = {
+        {'*','y','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*'},
+        {'*','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','*'},
+        {'*','.','*','.','*','*','*','*','*','*','*','*','*','.','*','*','*','.','*','.','*'},
+        {'*','.','*','.','.','.','.','.','.','.','.','.','*','.','.','.','*','.','*','.','*'},
+        {'*','*','*','*','*','*','*','*','*','.','*','*','*','*','*','.','*','*','*','*','*'},
+        {'*','.','.','.','.','.','.','.','.','.','*','.','.','.','.','.','.','.','.','.','*'},
+        {'*','.','*','.','*','*','*','*','*','.','*','.','*','*','*','.','*','*','*','.','*'},
+        {'*','.','*','.','.','.','.','.','*','.','*','.','.','.','*','.','.','.','*','.','*'},
+        {'*','.','*','.','*','*','*','.','*','.','*','*','*','*','*','*','*','*','*','.','*'},
+        {'*','.','*','.','.','.','*','.','*','.','.','.','.','.','.','.','.','.','*','.','*'},
+        {'*','.','*','*','*','*','*','*','*','*','*','*','*','.','*','*','*','.','*','*','*'},
+        {'*','.','.','.','.','.','.','.','.','.','.','.','*','.','.','.','*','.','.','.','*'},
+        {'*','.','*','.','*','.','*','.','*','*','*','*','*','.','*','*','*','.','*','*','*'},
+        {'*','.','*','.','*','.','*','.','.','.','.','.','*','.','.','.','*','.','.','.','*'},
+        {'*','.','*','.','*','.','*','.','*','.','*','.','*','*','*','.','*','*','*','*','*'},
+        {'*','.','*','.','*','.','*','.','*','.','*','.','.','.','*','.','.','.','.','.','*'},
+        {'*','.','*','*','*','*','*','*','*','.','*','*','*','*','*','.','*','.','*','.','*'},
+        {'*','.','.','.','.','.','.','.','*','.','.','.','.','.','*','.','*','.','*','.','*'},
+        {'*','.','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','.','*','.','*'},
+        {'*','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','*','.','*','f','*'},
+        {'*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*'},
+    };
+    String FileName = "maze1.txt";
+    String st = "";
+    Ball b = new Ball(20, 0, 0, 0);
+    Ball2 b2 = new Ball2(20, 0, 0, 0);
+    boolean win() {
+        if (b.getX() < 390 && b.getX() > 370 && b.getY() > 370 && b.getY() < 390){
+            return true;
+        }
+        else {
+            return false;
+        }
+      }
+    boolean win2(){
+        if (b2.getX2() < 390 && b2.getX2() > 370 && b2.getY2() > 370 && b2.getY2() < 390){
+            return true;
+        }
+        else {
+            return false;
+        }
+            }
+    public void init() {
+        setFocusable(true);
+        addKeyListener(this);
+        BufferedReader br = null;
+        FileReader fr = null;
+
+
+        try {
+            fr = new FileReader(FileName);
+            br = new BufferedReader(fr);
+            String sCurrentLine;
+            int rows = 0, cols = 0;
+            b.move();
+            b2.move();
+            while ((sCurrentLine = br.readLine()) != null) {
+                rows++;
+                cols = sCurrentLine.length();
+            }
+            maze = new char[rows][cols];
+            fr.close();
+            br.close();
+        } catch (IOException e) {}
+        try {
+            fr = new FileReader(FileName);
+            br = new BufferedReader(fr);
+            String sCurrentLine;
+            int r = 0;
+            while ((sCurrentLine = br.readLine()) != null) {
+                maze[r] = sCurrentLine.toCharArray();
+                r++;
+            }
+            fr.close();
+            br.close();
+        } catch (IOException e) {}
+    }
+    public void paint(Graphics g) {
+        showStatus("" + b.getX() + " " + b.getY() + " " + b2.getX2() + "" + b2.getY2());
+        for( int i = 0; i < maze.length; i++){
+                for ( int j = 0; j < maze.length; j++){
+                    if(maze[j][i] == '*'){
+                        g.setColor(Color.black);
+                        g.fillRect(i*20, j*20, 20, 20);
+                        }
+                    if(maze[j][i] == '.'){
+                        g.setColor(Color.white);
+                        g.fillRect(i*20, j*20, 20, 20);
+                    }
+                    if(maze[j][i] == 'y'){
+                        g.setColor(Color.green);
+                        g.fillRect(i*20, j*20, 20, 20);
+                    }
+                    if(maze[j][i] == 'f'){
+                        g.setColor(Color.red);
+                        g.fillRect(i*20, j*20, 20, 20);
+                    }
+                 }
+            }
+        if( win() == true){
+            g.setColor(Color.black);
+            g.drawString("Player 1 wins!", 200, 440);
+            g.drawString("Press r to restart", 150, 460);
+
+        }
+        if( win2() == true){
+            g.setColor(Color.black);
+            g.drawString("Player 2 wins!", 200, 440);
+            g.drawString("Press r to restart", 150, 460);
+
+        }
+        if( walls() == false){
+            restart();
+        }
+        g.setColor(Color.blue);
+        g.fillOval((int)b.getX(), (int)b.getY(), 18, 18);
+        g.setColor(Color.red);
+        g.fillOval((int)b2.getX2(), (int)b2.getY2(), 18, 18);
+        g.setColor(Color.black);
+        g.drawString("Use WASD for the Blue Player", 100, 450);
+        g.drawString("Use IJKL for the Red Player", 100, 470);
+        //b.move();
+        //repaint();
+        }
+    public void restart(){
+        b = new Ball(20, 0, 0, 0);
+    }
+    public void restart2(){
+        b2 = new Ball2(20, 0, 0, 0);
+    }
+    boolean walls(){
+        if(maze[(int)b.getY() / 20][(int) b.getX() / 20] == '*'){
+            restart();
+        }
+        if(maze[(int)b2.getY2() / 20][(int) b2.getX2() / 20] == '*'){
+            restart2();
+        }
+        return true;
+    }
+    public void keyTyped(KeyEvent e)  {
+        if(e.getKeyChar() == 'a') {
+            b.setVX(-20);
+            b.setVY(0);
+            b2.setVX2(0);
+            b2.setVY2(0);
+        }
+        if (e.getKeyChar() == 'd') {
+            b.setVX(20);
+            b.setVY(0);
+            b2.setVX2(0);
+            b2.setVY2(0);
+        }
+        if (e.getKeyChar() == 's'){
+            b.setVY(20);
+            b.setVX(0);
+            b2.setVX2(0);
+            b2.setVY2(0);
+        }
+        if (e.getKeyChar() == 'w'){
+            b.setVY(-20);
+            b.setVX(0);
+            b2.setVX2(0);
+            b2.setVY2(0);
+        }
+
+        if(e.getKeyChar() == 'j') {
+            b2.setVX2(-20);
+            b2.setVY2(0);
+            b.setVY(0);
+            b.setVX(0);
+        }
+        if (e.getKeyChar() == 'l') {
+            b2.setVX2(20);
+            b2.setVY2(0);
+            b.setVY(0);
+            b.setVX(0);
+        }
+        if (e.getKeyChar() == 'k'){
+            b2.setVY2(20);
+            b2.setVX2(0);
+            b.setVY(0);
+            b.setVX(0);
+        }
+        if (e.getKeyChar() == 'i'){
+            b2.setVY2(-20);
+            b2.setVX2(0);
+            b.setVY(0);
+            b.setVX(0);
+        }
+        if (e.getKeyChar () == 'r'){
+            restart();
+            restart2();
+        }
+        b.move();
+        repaint();
+        b2.move();
+        repaint();
+    }
+    public void keyPressed(KeyEvent e){}
+    public void keyReleased(KeyEvent e){}
+}
+
+
+
+
+
+
+
+
+public class Ball
+{
+    private double x, y;
+    private int vx, vy;
+    public Ball() {
+        x = 0;
+        y = 0;
+        vx = 0;
+        vy = 0;
+    }
+    public Ball(double x, double y, int vx, int vy){
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+    }
+    public double getX(){
+        return x;
+    }
+    public double getY(){
+        return y;
+    }
+    public double setVX(int velocity){
+        vx = velocity;
+        return velocity;
+    }
+    public double setVY(int velocity){
+        vy = velocity;
+        return velocity;
+    }
+    void move() {
+        x = x + vx;
+        y = y + vy;
+        if (x >= 400) {
+            x = 400;
+        }
+        if (x <= 0) {
+            x = 0;
+        }
+        if (y >= 400) {
+            y = 400;
+        }
+        if (y <= 0) {
+            y = 0;
+        }
+    }
+}
+
+
+
+
+public class Ball2
+{
+    private double x2, y2;
+    private int vx2, vy2;
+    public Ball2() {
+        x2 = 0;
+        y2 = 0;
+        vx2 = 0;
+        vy2 = 0;
+    }
+    public Ball2(double x2, double y2, int vx2, int vy2){
+        this.x2 = x2;
+        this.y2 = y2;
+        this.vx2 = vx2;
+        this.vy2 = vy2;
+    }
+    public double getX2(){
+        return x2;
+    }
+    public double getY2(){
+        return y2;
+    }
+    public double setVX2(int velocity){
+        vx2 = velocity;
+        return velocity;
+    }
+    public double setVY2(int velocity){
+        vy2 = velocity;
+        return velocity;
+    }
+    void move() {
+        x2 = x2 + vx2;
+
+        y2 = y2 + vy2;
+        if (x2 >= 400) {
+            x2 = 400;
+        }
+        if (x2 <= 0) {
+            x2 = 0;
+        }
+        if (y2 >= 400) {
+            y2 = 400;
+        }
+        if (y2 <= 0) {
+            y2 = 0;
+        }
+    }
+}
